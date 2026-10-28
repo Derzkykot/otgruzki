@@ -14,6 +14,7 @@ for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){
  await exists(path);
 }
 const urls=JSON.parse(sw.match(/const URLS=(\[[^\n]+\]);/)[1]);
+if(urls.some(path=>path.split('/').slice(1).some(part=>part.startsWith('.'))))throw Error('Hosting markers must not be included in the offline cache.');
 for(const path of urls)await exists(path);
 if(!urls.includes('./index.html')||!urls.some(p=>p.startsWith('./assets/')&&p.endsWith('.js')))throw Error('Incomplete offline cache.');
 console.log(`Release verified: ${urls.length} local cached files; relative paths support GitHub Pages.`);

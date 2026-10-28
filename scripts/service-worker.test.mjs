@@ -11,9 +11,11 @@ it('cold offline navigation loads cached HTML and a module even with Vary: Origi
   await mkdir(join(dir,'dist/assets'),{recursive:true});
   await writeFile(join(dir,'dist/index.html'),'<main>app</main>');
   await writeFile(join(dir,'dist/assets/app.js'),'app-module');
+  await writeFile(join(dir,'dist/.nojekyll'),'');
   const result=spawnSync(process.execPath,[resolve('scripts/service-worker.mjs')],{cwd:dir});
   expect(result.status).toBe(0);
   const source=await readFile(join(dir,'dist/sw.js'),'utf8');
+  expect(source).not.toContain('./.nojekyll');
   const handlers={},store=new Map();
   const cache={addAll:async urls=>{for(const u of urls)store.set(u,u.endsWith('.js')?'app-module':'<main>app</main>')},match:async(request,options)=>{if(typeof request!=='string'&&!options?.ignoreVary)return undefined;const text=store.get(typeof request==='string'?request:request.url);return text?new Response(text):undefined}};
   const self={registration:{scope:'https://example.test/app/'},location:{origin:'https://example.test'},clients:{claim:async()=>{}},addEventListener:(name,handler)=>handlers[name]=handler};

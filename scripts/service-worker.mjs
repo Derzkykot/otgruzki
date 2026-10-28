@@ -1,6 +1,6 @@
 import {readdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-async function list(dir){const result=[];for(const entry of await readdir(dir,{withFileTypes:true})){if(entry.isDirectory())result.push(...await list(dir+'/'+entry.name));else if(entry.name!=='sw.js')result.push(dir+'/'+entry.name)}return result;}
+async function list(dir){const result=[];for(const entry of await readdir(dir,{withFileTypes:true})){if(entry.name.startsWith('.'))continue;if(entry.isDirectory())result.push(...await list(dir+'/'+entry.name));else if(entry.name!=='sw.js')result.push(dir+'/'+entry.name)}return result;}
 const files=await list('dist');
 const hash=createHash('sha256');hash.update(await readFile(new URL(import.meta.url)));for(const path of files){hash.update(path);hash.update(await readFile(path));}
 const version=hash.digest('hex').slice(0,16);
